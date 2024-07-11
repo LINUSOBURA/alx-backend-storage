@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS user_avarages (
 			BEGIN
 				DECLARE avg_score DECIMAL(10, 2);
 
-				select AVG(score) INTO avg_score from corrections where user_id = user_id;
+				select AVG(score) INTO avg_score from corrections where corrections.user_id = user_id;
 
 				INSERT INTO user_avarages ( user_id, average_score ) VALUES(
 						 user_id, avg_score)
