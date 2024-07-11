@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS user_avarages (
 		user_id INT PRIMARY KEY,
 			average_score DECIMAL(10, 2)
-			)
+			);
 
 			DELIMITER //
 
