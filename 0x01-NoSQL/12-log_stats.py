@@ -7,6 +7,9 @@ from pymongo import MongoClient
 
 
 def log_statics():
+    """
+    A function that logs statistics related to Nginx logs stored in MongoDB. It counts the total number of logs, the number of logs for each HTTP method (GET, POST, PUT, PATCH, DELETE), and checks the status for GET requests with the path "/status".
+    """
     client = MongoClient('mongodb://127.0.0.1:27017')
     collection = client.logs.nginx
 
