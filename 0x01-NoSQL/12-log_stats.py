@@ -20,9 +20,8 @@ if __name__ == "__main__":
         "method": "GET",
         "path": "/status"
     })
-    print(f"{number_of_logs} logs")
+
     print(
-        f"Methods:\n\tmethod GET: {methods_GET}\n\tmethod POST: {methods_POST}\
+        f"{number_of_logs} logs\nMethods:\n\tmethod GET: {methods_GET}\n\tmethod POST: {methods_POST}\
 			\n\tmethod PUT: {methods_PUT}\n\tmethod PATCH: {methods_PATCH}\
-				\n\tmethod DELETE: {methods_DELETE}")
-    print(f"{status_check} status check")
+				\n\tmethod DELETE: {methods_DELETE}\n{status_check} status check")
