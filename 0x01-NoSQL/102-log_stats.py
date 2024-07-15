@@ -8,8 +8,24 @@ from pymongo import MongoClient
 
 def log_statics():
     """
-    A function that logs statistics related to Nginx logs stored in MongoDB. It counts the total number of logs, the number of logs for each HTTP method (GET, POST, PUT, PATCH, DELETE), and checks the status for GET requests with the path "/status".
+    Logs statistics related to Nginx logs stored in MongoDB.
+
+    This function connects to the MongoDB server at 'mongodb://127.0.0.1:27017'
+    and retrieves the 'nginx' collection from the 'logs' database. It then counts
+    the total number of logs, the number of logs for each HTTP method (GET, POST,
+    PUT, PATCH, DELETE), and checks the status for GET requests with the path
+    "/status".
+
+    The function also retrieves the top 10 IP addresses that have made the most
+    requests.
+
+    Parameters:
+        None
+
+    Returns:
+        None
     """
+
     client = MongoClient('mongodb://127.0.0.1:27017')
     collection = client.logs.nginx
 
@@ -42,10 +58,14 @@ def log_statics():
 
     top_ips = collection.aggregate(pipeline)
 
-    print(
-        f"{number_of_logs} logs\nMethods:\n\tmethod GET: {methods_GET}\n\tmethod POST: {methods_POST}\
-			\n\tmethod PUT: {methods_PUT}\n\tmethod PATCH: {methods_PATCH}\
-				\n\tmethod DELETE: {methods_DELETE}\n{status_check} status check")
+    print(f"{number_of_logs} logs")
+    print("Methods:")
+    print(f"\tmethod GET: {methods_GET}")
+    print(f"\tmethod POST: {methods_POST}")
+    print(f"\tmethod PUT: {methods_PUT}")
+    print(f"\tmethod PATCH: {methods_PATCH}")
+    print(f"\tmethod DELETE: {methods_DELETE}")
+    print(f"{status_check} status check")
     print("IPs:")
     for ip in top_ips:
         print(f"\t{ip['_id']}: {ip['count']}")
