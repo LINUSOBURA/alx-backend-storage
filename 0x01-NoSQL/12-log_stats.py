@@ -25,10 +25,14 @@ def log_statics():
         "path": "/status"
     })
 
-    print(
-        f"{number_of_logs} logs\nMethods:\n\tmethod GET: {methods_GET}\n\tmethod POST: {methods_POST}\
-			\n\tmethod PUT: {methods_PUT}\n\tmethod PATCH: {methods_PATCH}\
-				\n\tmethod DELETE: {methods_DELETE}\n{status_check} status check")
+    print(f"{number_of_logs} logs")
+    print("Methods:")
+    print(f"\tmethod GET: {methods_GET}")
+    print(f"\tmethod POST: {methods_POST}")
+    print(f"\tmethod PUT: {methods_PUT}")
+    print(f"\tmethod PATCH: {methods_PATCH}")
+    print(f"\tmethod DELETE: {methods_DELETE}")
+    print(f"{status_check} status check")
 
 
 if __name__ == "__main__":
