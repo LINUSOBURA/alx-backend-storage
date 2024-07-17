@@ -39,7 +39,7 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
-def replay(cache_instance, method: str):
+def replay(fn: Callable) -> None:
     """
     Retrieves the input and output data associated with the method from the cache instance and prints each pair of input and output with the method name.
     
@@ -47,15 +47,16 @@ def replay(cache_instance, method: str):
         cache_instance: The cache instance to retrieve the input and output data from.
         method (str): The method name for which the input and output data are retrieved.
     """
-    input_key = method + ":inputs"
-    output_key = method + ":outputs"
+    r = redis.Redis()
+    calls = r.get(fn.__qualname__)
+    inputs = r.lrange(fn.__qualname__ + ":inputs", 0, -1)
+    outputs = r.lrange(fn.__qualname__ + ":outputs", 0, -1)
 
-    inputs = cache_instance._redis.lrange(input_key, 0, -1)
-    outputs = cache_instance._redis.lrange(output_key, 0, -1)
-
-    print(f"{method} was called {len(inputs)} times:")
+    print(f"{fn.__qualname__} was called {calls} times:")
     for input, output in zip(inputs, outputs):
-        print(f"{method}{input.decode('utf-8')} -> {output.decode('utf-8')}")
+        print(
+            f"{fn.__qualname__}{input.decode('utf-8')} -> {output.decode('utf-8')}"
+        )
 
 
 class Cache:
