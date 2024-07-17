@@ -100,3 +100,15 @@ class Cache:
             int: The integer value associated with the key.
         """
         return self.get(key, fn=int)
+
+
+def replay(cache_instance, method: str):
+    input_key = method + ":inputs"
+    output_key = method + ":outputs"
+
+    inputs = cache_instance._redis.lrange(input_key, 0, -1)
+    outputs = cache_instance._redis.lrange(output_key, 0, -1)
+
+    print(f"{method} was called {len(inputs)} times:")
+    for input, output in zip(inputs, outputs):
+        print(f"{method}{input.decode('utf-8')} -> {output.decode('utf-8')}")
