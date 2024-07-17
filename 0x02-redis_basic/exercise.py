@@ -2,12 +2,24 @@
 """
 Exercises
 """
-from typing import Any, Callable
+from functools import wraps
+from typing import Any, Callable, Optional
 from uuid import uuid4
 
 import redis
 
 r = redis.Redis()
+
+
+def count_calls(method: Callable) -> Callable:
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        key = method.__qualname__
+        r.incr(key)
+        return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 class Cache:
@@ -19,6 +31,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Any) -> str:
         """
         Store the data in the cache with a unique key.
@@ -33,7 +46,7 @@ class Cache:
         r.set(key, data)
         return key
 
-    def get(self, key: str, fn: Callable):
+    def get(self, key: str, fn: Optional[Callable] = None):
         """
         Retrieves the value from the cache associated with the given key and applies a callback function to it.
         
@@ -41,7 +54,10 @@ class Cache:
             key (str): The key to retrieve the value from the cache.
             fn (Callable): The callback function to be applied to the retrieved value.
         """
-        fn(r.get(key))
+        result = r.get(key)
+        if result is not None and fn is not None:
+            return fn(result)
+        return result
 
     def get_str(self, key: str) -> str:
         """
@@ -53,7 +69,7 @@ class Cache:
         Returns:
             str: The string value associated with the key.
         """
-        return str(self.get(key))
+        return self.get(key, fn=lambda x: x.decode("utf-8"))
 
     def get_int(self, key: str) -> int:
         """
@@ -65,4 +81,4 @@ class Cache:
         Returns:
             int: The integer value associated with the key.
         """
-        return int(self.get(key))
+        return self.get(key, fn=int)
