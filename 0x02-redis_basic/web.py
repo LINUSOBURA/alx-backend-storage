@@ -7,12 +7,14 @@ from typing import Callable
 
 import redis
 import requests
-import requests
 
 r = redis.Redis()
 
 
 def access_count(method: Callable) -> Callable:
+    """"
+ 	Increments the count associated with the URL in Redis cache and calls the method with the URL and its arguments.
+  	"""
 
     @wraps(method)
     def wrapper(url: str, *args, **kwargs):
@@ -44,5 +46,21 @@ def cache_result(expiration: int = 10) -> Callable:
 @access_count
 @cache_result(expiration=10)
 def get_page(url: str) -> str:
+    """
+    Retrieves the content of a web page from the specified URL and caches it for a specified duration.
+    
+    Parameters:
+        url (str): The URL of the web page to retrieve.
+        
+    Returns:
+        str: The content of the web page.
+        
+    Raises:
+        requests.exceptions.RequestException: If there is an error making the HTTP request.
+        
+    Side Effects:
+        - Increments the access count for the specified URL in the Redis cache.
+        - Caches the content of the web page for a specified duration in the Redis cache.
+    """
     response = requests.get(url)
     return response.text
