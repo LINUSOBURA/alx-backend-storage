@@ -39,6 +39,25 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
+def replay(cache_instance, method: str):
+    """
+    Retrieves the input and output data associated with the method from the cache instance and prints each pair of input and output with the method name.
+    
+    Parameters:
+        cache_instance: The cache instance to retrieve the input and output data from.
+        method (str): The method name for which the input and output data are retrieved.
+    """
+    input_key = method + ":inputs"
+    output_key = method + ":outputs"
+
+    inputs = cache_instance._redis.lrange(input_key, 0, -1)
+    outputs = cache_instance._redis.lrange(output_key, 0, -1)
+
+    print(f"{method} was called {len(inputs)} times:")
+    for input, output in zip(inputs, outputs):
+        print(f"{method}{input.decode('utf-8')} -> {output.decode('utf-8')}")
+
+
 class Cache:
 
     def __init__(self) -> None:
@@ -100,22 +119,3 @@ class Cache:
             int: The integer value associated with the key.
         """
         return self.get(key, fn=int)
-
-
-def replay(cache_instance, method: str):
-    """
-    Retrieves the input and output data associated with the method from the cache instance and prints each pair of input and output with the method name.
-    
-    Parameters:
-        cache_instance: The cache instance to retrieve the input and output data from.
-        method (str): The method name for which the input and output data are retrieved.
-    """
-    input_key = method + ":inputs"
-    output_key = method + ":outputs"
-
-    inputs = cache_instance._redis.lrange(input_key, 0, -1)
-    outputs = cache_instance._redis.lrange(output_key, 0, -1)
-
-    print(f"{method} was called {len(inputs)} times:")
-    for input, output in zip(inputs, outputs):
-        print(f"{method}{input.decode('utf-8')} -> {output.decode('utf-8')}")
