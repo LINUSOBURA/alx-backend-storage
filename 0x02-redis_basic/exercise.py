@@ -3,7 +3,7 @@
 Exercises
 """
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Callable, Optional, Union
 from uuid import uuid4
 
 import redis
@@ -50,7 +50,7 @@ class Cache:
 
     @count_calls
     @call_history
-    def store(self, data: Any) -> str:
+    def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         Store the data in the cache with a unique key.
         
