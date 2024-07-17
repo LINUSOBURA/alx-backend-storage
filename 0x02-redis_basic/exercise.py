@@ -61,7 +61,7 @@ class Cache:
             str: The unique key under which the data is stored in the cache.
         """
         key = str(uuid4())
-        r.set(key, data)
+        self._redis.set(key, data)
         return key
 
     def get(self, key: str, fn: Optional[Callable] = None):
