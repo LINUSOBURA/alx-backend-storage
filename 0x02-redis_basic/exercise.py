@@ -16,8 +16,25 @@ def count_calls(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         key = method.__qualname__
-        r.incr(key)
+        self._redis.incr(key)
         return method(self, *args, **kwargs)
+
+    return wrapper
+
+
+def call_history(method: Callable) -> Callable:
+
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        input_key = method.__qualname__ + ":inputs"
+        output_key = method.__qualname__ + ":outputs"
+
+        self._redis.rpush(input_key, str(args))
+
+        output = method(self, *args, **kwargs)
+
+        self._redis.rpush(output_key, str(output))
+        return output
 
     return wrapper
 
@@ -32,6 +49,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Any) -> str:
         """
         Store the data in the cache with a unique key.
@@ -54,7 +72,7 @@ class Cache:
             key (str): The key to retrieve the value from the cache.
             fn (Callable): The callback function to be applied to the retrieved value.
         """
-        result = r.get(key)
+        result = self._redis.get(key)
         if result is not None and fn is not None:
             return fn(result)
         return result
