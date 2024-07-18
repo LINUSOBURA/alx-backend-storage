@@ -19,6 +19,10 @@ def count_calls(method: Callable) -> Callable:
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):
+        """
+         Wrapper function that increments a key in Redis
+         for each call to the decorated method.
+        """
 
         key = method.__qualname__
         self._redis.incr(key)
@@ -35,6 +39,10 @@ def call_history(method: Callable) -> Callable:
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):
+        """
+        Decorator function that records the input and output
+        of a method call using Redis.
+        """
         input_key = method.__qualname__ + ":inputs"
         output_key = method.__qualname__ + ":outputs"
 
