@@ -12,9 +12,14 @@ r = redis.Redis()
 
 
 def count_calls(method: Callable) -> Callable:
+    """
+    This function increments a key for each call to
+    the method and returns the method result.
+    """
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):
+
         key = method.__qualname__
         self._redis.incr(key)
         return method(self, *args, **kwargs)
@@ -23,6 +28,10 @@ def count_calls(method: Callable) -> Callable:
 
 
 def call_history(method: Callable) -> Callable:
+    """
+    Decorator function that records the input and output
+    of a method call using Redis.
+    """
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):
@@ -41,29 +50,32 @@ def call_history(method: Callable) -> Callable:
 
 def replay(fn: Callable) -> None:
     """
-    Retrieves the input and output data associated with the method from the cache instance and prints each pair of input and output with the method name.
-    
+    Retrieves the input and output data associated with the method from
+    the cache instance and prints each pair of input and output
+    with the method name.
     Parameters:
-        cache_instance: The cache instance to retrieve the input and output data from.
-        method (str): The method name for which the input and output data are retrieved.
+        cache_instance: The cache instance to retrieve the input
+        and output data from.
+        method (str): The method name for which the input and
+        output data are retrieved.
     """
     r = redis.Redis()
     calls = r.get(fn.__qualname__)
     inputs = r.lrange(fn.__qualname__ + ":inputs", 0, -1)
     outputs = r.lrange(fn.__qualname__ + ":outputs", 0, -1)
 
-    print(f"{fn.__qualname__} was called {calls} times:")
+    print(f"{fn.__qualname__} was called {int(calls.decode('utf-8'))} times:")
     for input, output in zip(inputs, outputs):
-        print(
-            f"{fn.__qualname__}{input.decode('utf-8')} -> {output.decode('utf-8')}"
-        )
+        print(f"{fn.__qualname__}(*{input.decode('utf-8')},) ->\
+                {output.decode('utf-8')}")
 
 
 class Cache:
 
     def __init__(self) -> None:
         """
-        Initializes the Cache object by creating a Redis connection and flushing the Redis database.
+        Initializes the Cache object by creating a Redis connection and
+        flushing the Redis database.
         """
         self._redis = redis.Redis()
         self._redis.flushdb()
@@ -73,7 +85,7 @@ class Cache:
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """
         Store the data in the cache with a unique key.
-        
+
         Parameters:
             data (Any): The data to be stored in the cache.
 
@@ -86,11 +98,13 @@ class Cache:
 
     def get(self, key: str, fn: Optional[Callable] = None):
         """
-        Retrieves the value from the cache associated with the given key and applies a callback function to it.
-        
+        Retrieves the value from the cache associated with the given key and
+        applies a callback function to it.
+
         Parameters:
             key (str): The key to retrieve the value from the cache.
-            fn (Callable): The callback function to be applied to the retrieved value.
+            fn (Callable): The callback function to be applied to the
+            retrieved value.
         """
         result = self._redis.get(key)
         if result is not None and fn is not None:
@@ -99,11 +113,12 @@ class Cache:
 
     def get_str(self, key: str) -> str:
         """
-        Retrieves a string value from the cache associated with the given key and converts it to a string.
-        
+        Retrieves a string value from the cache associated with the given
+        key and converts it to a string.
+
         Parameters:
             key (str): The key to retrieve the string value from the cache.
-        
+
         Returns:
             str: The string value associated with the key.
         """
@@ -111,11 +126,12 @@ class Cache:
 
     def get_int(self, key: str) -> int:
         """
-        Retrieves an integer value from the cache associated with the given key and converts it to an integer.
-        
+        Retrieves an integer value from the cache associated with the given
+        key and converts it to an integer.
+
         Parameters:
             key (str): The key to retrieve the integer value from the cache.
-        
+
         Returns:
             int: The integer value associated with the key.
         """
